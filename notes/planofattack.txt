@@ -1,12 +1,17 @@
 https://chatgpt.com/c/67c7d521-417c-800c-9207-f9e47056e7ee
-
-- feature extraction: ecapa-tdnn & prosody (actl maybe can use the anon one)
-- feature engineering: cosine, manhanttan dist/euclidean and cluster based feature
-- model training: SVM, XGBoost, LogReg, Random Forest and gridsearch/bayesian search
+ 
+Planned Slide Content:
+ 
+- feature extraction: voiceprint extraction using ecapa-tdnn & prosody extraction using tacatron
+ 
+- feature engineering: added in features using manhanttan dist and cluster. we will be backing on why this features are needed using a correlation matrix.
+ 
+- model training: SVM, XGBoost, LogReg and gridsearch/bayesian search
+ 
 - evaluation: evaluate using EER, compare all models
-- interpretability & visualisation: shap/lime if use XGBoost or RF, plot embeddings with t-sne to illustrate speaker seperatability
-- optimisation: implement in C, show improvements in speed
-- reporting: summarise results, show that we beat baseline model, do live demo with UI (maybe user can record multiple times of his voice or like say a whole paragraph, then another person try to access)
-- show which ones we got wrong, which one correct
-
+ 
+- optimisation: implement in C to show improvements in speed
+ 
+- reporting: summarise results, show that we beat baseline model, do demo showcasing how our model work
+ 
 future works: augment data with noise, reverb, speed and pitch, also use MLFlow to show that you systematically compare results.
