@@ -1,0 +1,26 @@
+https://chatgpt.com/c/67c941f2-7e08-800c-b9ce-545e78826b8e?model=o3-mini-high
+https://dinhanhthi.com/note/dbscan-hdbscan-clustering/
+
+# Instruction
+Evaluate my plan.
+
+# Context: 
+I want to cluster my utterance audios to classify them to type of voices. The goal is for this to be an extra feature.
+
+## Background:
+- Currently, I have 5 columns in my X and 1 in y.
+X: diff & prod btwn voiceprint embeddings, diff & prod btwn prosody embeddings and manhattan distance btwn voiceprint embeddings.
+when i say diff or prod btwn embeddings, this is comparing the speaker embedding and the utterance embedding.
+y: Hence as we are comparing between speaker embedding and utterance embedding, the y is on whether it the speaker embedding and utterance is a match or not.
+
+## My Plan:
+### Outcome: A speaker embedding will be classified to a cluster and an utterance embedding matched to a cluster. The extra feature we will add is whether the speaker embedding category matches the utterance embedding.
+
+## Step by Step
+1. We will be clustering the enrolls.
+- the rationale is that it will reduce computational time as enroll audio is less than trials and secondly, trial audio contains extra audio that dont match to any speaker. hence if we dont train on this, its good because they have lower chance in clustering into a category (we're using dbscan) and hence will not match to any - reducing false positives.
+2. We will be using DBSCAN so that some will be classified as noise rather than being forced to be clustered to a category like k-means.
+3. We won't need to choose the number of clusters as DBScan does that for us, but we will need to find the right params for epsilon and minpts.
+4. We will also need to reduce dimension to reduce computational time as each utterance embedding is 192 dimensions.
+5. And lastly, once everything has been clustered we will check on whether there is a correlaton to a matched category vs actual y column. For example, if majority of the matched category actually results to y matching, then this category plan works.
+6. If it works, then for our inference pipeline, every utterance will be clustered to the cluster map trained on the training data.
