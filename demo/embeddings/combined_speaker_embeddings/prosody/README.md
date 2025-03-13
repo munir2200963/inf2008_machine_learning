@@ -1,0 +1,1 @@
+the combined speaker embedding for prosody aft being combined from speaker_embeddings folder will be saved here

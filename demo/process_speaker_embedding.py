@@ -1,13 +1,10 @@
 import os
+import shutil
 import numpy as np
-from tqdm import tqdm  # Import tqdm for progress bar
+from tqdm import tqdm 
 from tacatron import TacatronProsodyExtractor
 from ecapa_tdnn import ECAPAVoiceprintExtractor
-from sentences import sentences
-import os
-import shutil
-import os
-import numpy as np
+from sentences import sentences  # Assumes this is a list of texts for the audios
 
 def save_audios(audios, name, output_folder):
     """
@@ -17,7 +14,7 @@ def save_audios(audios, name, output_folder):
         audios (list): List of file paths to the 20 audio files.
         name (str): The base name to use for the output files.
         output_folder (str): The directory where the audio files will be saved.
-    
+        
     Raises:
         ValueError: If the number of audio files provided is not 20.
         
@@ -26,12 +23,10 @@ def save_audios(audios, name, output_folder):
     """
     if len(audios) != 20:
         raise ValueError("Expected exactly 20 audio files.")
-
-    # Ensure the output folder exists.
-    os.makedirs(output_folder, exist_ok=True)
     
+    os.makedirs(output_folder, exist_ok=True)
     saved_files = []
-    # Iterate over the audio files and copy them with the new naming scheme.
+    
     for i, audio_path in enumerate(audios, start=1):
         new_filename = f"{name}-{i:03d}.wav"
         destination_path = os.path.join(output_folder, new_filename)
@@ -55,14 +50,10 @@ def combine_embeddings(name, input_folder, output_folder):
     Returns:
         np.ndarray or None: The averaged embedding, or None if no embeddings were found.
     """
-    # Ensure the output folder exists.
     os.makedirs(output_folder, exist_ok=True)
-    
     embeddings = []
     
-    # Loop over all files in the input folder.
     for file in os.listdir(input_folder):
-        # Check if file starts with the provided name and ends with .npy
         if file.startswith(f"{name}-") and file.endswith('.npy'):
             file_path = os.path.join(input_folder, file)
             try:
@@ -72,7 +63,6 @@ def combine_embeddings(name, input_folder, output_folder):
                 print(f"Error loading file {file_path}: {e}")
     
     if embeddings:
-        # Stack embeddings into a 2D array and average along the first axis.
         avg_embedding = np.mean(np.vstack(embeddings), axis=0)
         output_file = os.path.join(output_folder, f"{name}.npy")
         np.save(output_file, avg_embedding)
@@ -82,45 +72,65 @@ def combine_embeddings(name, input_folder, output_folder):
         print(f"No embeddings found for name '{name}' in {input_folder}")
         return None
 
-
-audio_files = [f"/path/to/audio_{i}.wav" for i in range(1, 21)]
-base_name = "munir"
-output_dir = "demo\wav"
-audio_folder = "demo\wav"
-voiceprint_embeddings_folder = "demo\embeddings\speaker_embeddings"
-prosody_embeddings_folder = "demo\embeddings\speaker_embeddings"
-voiceprint_combined_embeddings_folder = "demo\embeddings\combined_speaker_embeddings"
-prosody_combined_embeddings_folder = "demo\embeddings\combined_speaker_embeddings"
-
-# Save and rename audio
-audio_files = save_audios(audio_files, base_name, output_dir)
-
-# Create an instance of the extractor and process files
-voiceprint_extractor = ECAPAVoiceprintExtractor()
-enroll_embeddings = voiceprint_extractor.process_files(audio_files, voiceprint_embeddings_folder)
-
-print("Embeddings extracted and saved successfully!")
-
-prosody_extractor = TacatronProsodyExtractor(use_cuda=False)
+def process_speaker_embedding(base_name, audio_files):
+    """
+    Processes speaker embeddings by performing the following:
+      1. Save and rename 20 audio files using the provided base name.
+      2. Extract voiceprint enrollment embeddings using a batch extraction method.
+      3. Extract prosody embeddings for each audio file.
+      4. Combine the extracted embeddings for both voiceprint and prosody.
+      5. (Placeholder) Add clustering logic with the combined embeddings.
     
-for i in range(1, 21):
-    audio_path = audio_files[i]
-    text = sentences[i]
+    Args:
+      base_name (str): The base name/identifier for the speaker (e.g., 'munir').
+      audio_files (list): List of 20 file paths to the speaker's audio files.
+    
+    Returns:
+      None
+    """
 
-    embedding = prosody_extractor.get_prosody_embedding(audio_path, text)
+    output_dir = "demo/wav" # Directory where the renamed audio files will be saved.
+    voiceprint_embeddings_folder = "demo/embeddings/speaker_embeddings/voiceprint" # Folder where voiceprint embeddings will be saved.
+    prosody_embeddings_folder = "demo/embeddings/speaker_embeddings/prosody" # Folder where prosody embeddings will be saved.
+    voiceprint_combined_embeddings_folder = "demo/embeddings/combined_speaker_embeddings/voiceprint" # Folder to save the combined voiceprint embedding.
+    prosody_combined_embeddings_folder = "demo/embeddings/combined_speaker_embeddings/prosody" # Folder to save the combined prosody embedding.
 
-    # Construct the output filename: replace '.wav' with '.npy'
-    base_filename = os.path.basename(audio_path)
-    npy_filename = base_filename.replace('.wav', '.npy')
-    output_path = os.path.join(prosody_embeddings_folder, npy_filename)
+    # Save and rename audio files
+    saved_audio_files = save_audios(audio_files, base_name, output_dir)
+    
+    # Extract voiceprint enrollment embeddings (batch processing)
+    enroll_embeddings = voiceprint_extractor.process_files(saved_audio_files, voiceprint_embeddings_folder)
+    print("Voiceprint embeddings extracted and saved successfully!")
+    
+    # Extract prosody embeddings for each audio file
+    for i in range(len(saved_audio_files)):
+        audio_path = saved_audio_files[i]
+        # Adjust index for sentences if needed (assuming sentences is a list with 20 items)
+        text = sentences[i]
+        
+        embedding = prosody_extractor.get_prosody_embedding(audio_path, text)
+        base_filename = os.path.basename(audio_path)
+        npy_filename = base_filename.replace('.wav', '.npy')
+        output_path = os.path.join(prosody_embeddings_folder, npy_filename)
+        np.save(output_path, embedding)
+        print(f"Saved prosody embedding for {audio_path} as {output_path}")
+    
+    # Combine embeddings for voiceprint and prosody
+    combine_embeddings(base_name, voiceprint_embeddings_folder, voiceprint_combined_embeddings_folder)
+    combine_embeddings(base_name, prosody_embeddings_folder, prosody_combined_embeddings_folder)
+    
+    # Placeholder: Add clustering logic here
+    # TODO: Implement clustering process with the combined embeddings.
+    print("Clustering placeholder: Add clustering logic here.")
+    
+    # Optionally, return some output or simply finish processing.
+    return
 
-    # Save the embedding as a NumPy .npy file.
-    np.save(output_path, embedding)
-
-# Combine embeddings for voice print and prosody
-combine_embeddings(base_name, voiceprint_embeddings_folder, voiceprint_combined_embeddings_folder)
-combine_embeddings(base_name, prosody_embeddings_folder, prosody_combined_embeddings_folder)
-
-
-
-
+# Example usage:
+if __name__ == "__main__":
+    # Define input parameters
+    audio_files = [f"/path/to/audio_{i}.wav" for i in range(1, 21)]
+    base_name = "munir"
+    
+    # Process speaker embeddings and run placeholder clustering
+    process_speaker_embedding(base_name, audio_files)
