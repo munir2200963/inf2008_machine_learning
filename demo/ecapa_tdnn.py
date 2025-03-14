@@ -69,33 +69,36 @@ class ECAPAVoiceprintExtractor:
         # Remove extra dimensions and convert to numpy array
         return embeddings.squeeze().numpy()
 
-    def process_files(self, file_path, output_folder):
+    def process_files(self, file_list, output_folder):
         """
-        Process a single audio file to extract and save its embedding.
+        Process a list of audio files to extract and save embeddings.
         
         Args:
-            file_path (str): Path to the audio file.
-            output_folder (str): Directory where the embedding will be saved.
+            file_list (list): List of audio file paths.
+            output_folder (str): Directory where embeddings will be saved.
         
         Returns:
-            np.ndarray: The extracted embedding.
+            dict: A dictionary mapping filenames to embeddings.
         """
         os.makedirs(output_folder, exist_ok=True)
+        embeddings_dict = {}
+        for file_path in file_list:
+            # Load and preprocess audio
+            audio = self.load_audio(file_path)
+            audio_tensor = self.preprocess_audio(audio)
+            
+            # Extract embedding
+            embedding = self.extract_embedding(audio_tensor)
+            
+            # Save the embedding using the same filename as the audio file
+            file_name = os.path.basename(file_path).replace('.wav', '.npy')
+            output_path = os.path.join(output_folder, file_name)
+            np.save(output_path, embedding)
+            
+            # Optionally store embedding in dictionary
+            embeddings_dict[file_name] = embedding
         
-        # Load and preprocess audio
-        audio = self.load_audio(file_path)
-        audio_tensor = self.preprocess_audio(audio)
-        
-        # Extract embedding
-        embedding = self.extract_embedding(audio_tensor)
-        
-        # Save the embedding using the same base filename as the audio file but with .npy extension
-        file_name = os.path.basename(file_path).replace('.wav', '.npy')
-        output_path = os.path.join(output_folder, file_name)
-        np.save(output_path, embedding)
-        print(f"Saved embedding for {file_path} as {output_path}")
-        
-        return embedding
+        return embeddings_dict
 
 # Example usage:
 if __name__ == "__main__":
@@ -103,13 +106,14 @@ if __name__ == "__main__":
     enroll_folder = "/content/drive/MyDrive/ML_project/libri_dev_enrolls_B3/wav"
     output_folder = "/content/drive/MyDrive/ML_project/enroll_embeddings"
 
-    # List all .wav files in the enroll folder; here we process just the first file
+    # List all .wav files in the enroll folder
     enroll_files = [os.path.join(enroll_folder, f) for f in os.listdir(enroll_folder) if f.endswith('.wav')]
+
     print(f"Found {len(enroll_files)} enroll files.")
 
-    if enroll_files:
-        extractor = ECAPAVoiceprintExtractor()
-        embedding = extractor.process_files(enroll_files[0], output_folder)
-        print("Extracted Embedding:", embedding)
-    else:
-        print("No audio files found.")
+    # Create an instance of the extractor and process files
+    extractor = ECAPAVoiceprintExtractor()
+    enroll_embeddings = extractor.process_files(enroll_files, output_folder)
+
+    print("Embeddings extracted and saved successfully!")
+    print("Enroll Embeddings:", os.listdir(output_folder))
