@@ -1,58 +1,7 @@
-# === Helper Functions for Data Loading ===
-def count_files(folder):
-    """Returns the number of files (ignoring subdirectories) in a folder."""
-    return len([f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))])
-
-def load_csv(file_path):
-    """Loads a CSV file into a DataFrame if it exists, else returns None."""
-    return pd.read_csv(file_path) if os.path.exists(file_path) else None
-
-def print_file_counts(dataset, modality, enroll_path, speaker_emb_path, trial_path):
-    """Prints the number of files in given modality folders."""
-    enroll_count = count_files(enroll_path) if os.path.exists(enroll_path) else 0
-    speaker_emb_count = count_files(speaker_emb_path) if os.path.exists(speaker_emb_path) else 0
-    trial_count = count_files(trial_path) if os.path.exists(trial_path) else 0
-
-    print(f"{dataset} - {modality.capitalize()}:")
-    print(f"    Combined speaker embeddings (enroll_path) file count: {enroll_count}")
-    print(f"    Speaker embeddings (speaker_emb_path) file count: {speaker_emb_count}")
-    print(f"    Trial embeddings file count: {trial_count}")
-
-def process_dataset(dataset):
-    """Processes each dataset: Loads CSVs, sets up folder paths, and prints file counts."""
-    ds_data_path = os.path.join(BASE_PATH, dataset, "data")
-
-    # Load CSV files
-    trials_dfs[dataset] = load_csv(os.path.join(ds_data_path, "trials.csv"))
-    spk2utt_dfs[dataset] = load_csv(os.path.join(ds_data_path, "spk2utt.csv"))
-
-    # Initialize folder paths dictionary
-    folder_paths[dataset] = {}
-
-    # Process each modality
-    for modality, folder in MODALITIES.items():
-        mod_path = os.path.join(ds_data_path, folder)
-        enroll_path = os.path.join(mod_path, "combined_speaker_embeddings")
-        speaker_emb_path = os.path.join(mod_path, "speaker_embeddings")
-        trial_path = os.path.join(mod_path, "trial_embeddings")
-
-        # Store paths in dictionary
-        folder_paths[dataset][modality] = {
-            'enroll_path': enroll_path,
-            'speaker_emb_path': speaker_emb_path,
-            'trial_path': trial_path
-        }
-
-        # Print file counts
-        print_file_counts(dataset, modality, enroll_path, speaker_emb_path, trial_path)
-
-    # Add the feature_vector folder path
-    folder_paths[dataset]["feature_vector"] = os.path.join(BASE_PATH, dataset, "feature_vector")
-
-    # Print CSV file information
-    print(f"{dataset} trials.csv shape: {trials_dfs[dataset].shape if trials_dfs[dataset] is not None else 'Not found'}")
-    print(f"{dataset} spk2utt.csv shape: {spk2utt_dfs[dataset].shape if spk2utt_dfs[dataset] is not None else 'Not found'}")
-    print("-" * 50)
+import os
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
 
 # -------------------------------
 # Helper Functions
