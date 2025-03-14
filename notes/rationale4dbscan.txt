@@ -1,0 +1,14 @@
+In a typical supervised learning scenario (such as when normalizing data), you use statistics computed on the train set to process the test set. However, in speaker verification, the enrollment data for each evaluation set (training, validation, test) is treated as a separate, known reference for that set. 
+
+So, if your test set provides its own enrollment embeddings, clustering those test enrollments separately is acceptable because:
+
+- **Enrollment as Reference:**  
+  In speaker verification, the enrollment data (from which you build your reference clusters) is available at test time. It’s not “peeking” into the trial data; it’s the legitimate reference provided for each speaker in that evaluation.
+
+- **Consistency Within the Set:**  
+  Clustering the test enrollments allows you to capture the speaker-specific distribution for that set, which may differ from the training set distribution. This ensures that when you assign trial utterances to clusters, you are comparing them to the correct reference clusters.
+
+- **Different Context:**  
+  The normalization principle (using train mean/std) is mainly for supervised model training and avoiding data leakage. In this case, enrollment clustering is part of the verification pipeline, and the enroll embeddings are used as ground truth references for that session.
+
+Thus, it is not wrong for your "Cluster Match" method to cluster test enrollments using test enrollment data, as long as the enrollment data is the appropriate reference for that evaluation set.
