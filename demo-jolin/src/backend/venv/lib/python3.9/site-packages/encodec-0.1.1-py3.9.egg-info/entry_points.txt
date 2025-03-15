@@ -1,0 +1,3 @@
+[console_scripts]
+encodec = encodec.__main__:main
+

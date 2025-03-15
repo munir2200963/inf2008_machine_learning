@@ -1,0 +1,11 @@
+../gruut_lang_es/VERSION
+../gruut_lang_es/__init__.py
+../gruut_lang_es/__pycache__/__init__.cpython-311.pyc
+../gruut_lang_es/espeak/g2p/model.crf
+../gruut_lang_es/espeak/lexicon.db
+../gruut_lang_es/g2p/model.crf
+../gruut_lang_es/lexicon.db
+PKG-INFO
+SOURCES.txt
+dependency_links.txt
+top_level.txt

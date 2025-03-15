@@ -1,0 +1,10 @@
+../bnnumerizer/__init__.py
+../bnnumerizer/__pycache__/__init__.cpython-311.pyc
+../bnnumerizer/__pycache__/numerizer.cpython-311.pyc
+../bnnumerizer/__pycache__/words.cpython-311.pyc
+../bnnumerizer/numerizer.py
+../bnnumerizer/words.py
+PKG-INFO
+SOURCES.txt
+dependency_links.txt
+top_level.txt
