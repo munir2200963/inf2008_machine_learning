@@ -107,9 +107,12 @@
 import os
 import numpy as np
 import torch
+import pickle
+import joblib
 from pydub import AudioSegment
 from tacatron import TacatronProsodyExtractor
 from ecapa_tdnn import ECAPAVoiceprintExtractor
+from clustering_utils import * 
 
 # Directory for saving properly converted WAV files
 CONVERTED_AUDIO_DIR = "uploads/converted_wav"
@@ -222,6 +225,20 @@ def validateTrial(speaker_name, trialAudio, text):
         print("❌ Audio conversion failed. Exiting function.")
         return False
     
+    # For scaling new data using X_train data
+    scaler = joblib.load("scaler.pkl")
+
+    # For cluster
+    with open("umap_model_demo.pkl", "rb") as f:
+        umap_data = pickle.load(f)
+
+    umap_model_demo = umap_data["umap_model"]
+    speaker_cluster_mapping_demo = umap_data["speaker_cluster_mapping"]
+    cluster_centroids_demo = umap_data["cluster_centroids"]
+
+    # Model
+    speaker_validation_model = joblib.load("model_final.pkl")
+    
     try:
         # Instantiate extractors
         voiceprint_extractor = ECAPAVoiceprintExtractor() 
@@ -244,25 +261,27 @@ def validateTrial(speaker_name, trialAudio, text):
         
         # Compute Manhattan (L1) distance for voiceprint embeddings
         vp_manhattan = compute_manhattan(speaker_voiceprint, trial_voiceprint)
-        
-        # Compute cosine similarity for reference (useful for debugging)
-        vp_similarity = compute_similarity(speaker_voiceprint, trial_voiceprint)
-        pr_similarity = compute_similarity(speaker_prosody, trial_prosody)
-        
-        print(f"✅ Voiceprint similarity: {vp_similarity:.4f}, Prosody similarity: {pr_similarity:.4f}")
+
+        cluster_match = get_cluster_match(speaker_name, trial_voiceprint, umap_model_demo, speaker_cluster_mapping_demo, cluster_centroids_demo)
         
         # Concatenate all computed features into a single feature vector
-        feature_vector = np.array([vp_prod, vp_diff, pr_prod, pr_diff, vp_manhattan])
-        
-        # Simple decision logic based on computed features
-        # This can be replaced with a trained model later
-        THRESHOLD_VP = 0.6  # Voiceprint similarity threshold
-        THRESHOLD_PR = 0.5  # Prosody similarity threshold
-        
-        # Combined verification decision
-        is_valid_speaker = bool(vp_similarity >= THRESHOLD_VP and pr_similarity >= THRESHOLD_PR)
-        
+        feature_vector = np.concatenate([
+            np.array([vp_prod]),
+            np.array([vp_diff]),
+            np.array([pr_prod]),
+            np.array([pr_diff]),
+            np.array([vp_manhattan]),
+            np.array([cluster_match])
+        ])
+
+        feature_vector = scaler.transform(feature_vector)
+    
         print(f"✅ Feature vector: {feature_vector}")
+
+        predictions = speaker_validation_model.predict(feature_vector.reshape(1, -1))
+
+        is_valid_speaker = int(predictions[0])
+
         print(f"✅ Speaker Validation Result: {'Verified ✓' if is_valid_speaker else 'Not Verified ✗'}")
         
         return is_valid_speaker

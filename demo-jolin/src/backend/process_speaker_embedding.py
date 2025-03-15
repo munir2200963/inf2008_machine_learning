@@ -138,9 +138,11 @@ import os
 import shutil
 import numpy as np
 from tqdm import tqdm 
+import pickle
 from tacatron import TacatronProsodyExtractor
 from ecapa_tdnn import ECAPAVoiceprintExtractor
-from sentences import sentences  
+from sentences import sentences 
+from clustering_utils import * 
 
 
 # Initialize Extractors
@@ -232,7 +234,17 @@ def process_speaker_embedding(user_id, audio_files):
     combine_embeddings(user_id, voiceprint_embeddings_folder, voiceprint_combined_embeddings_folder)
     combine_embeddings(user_id, prosody_embeddings_folder, prosody_combined_embeddings_folder)
     
-    print("Clustering placeholder: Add clustering logic here.")
+    # Compute clusters
+    umap_model_demo, speaker_cluster_mapping_demo, cluster_centroids_demo = process_enroll_data(voiceprint_embeddings_folder, voiceprint_embeddings_folder)
+
+    # Save the UMAP model, speaker cluster mapping, and cluster centroids to a file
+    with open("umap_model_demo.pkl", "wb") as f:
+        pickle.dump({
+            "umap_model": umap_model_demo,
+            "speaker_cluster_mapping": speaker_cluster_mapping_demo,
+            "cluster_centroids": cluster_centroids_demo
+        }, f)
+    
     return
 
 # Example usage:

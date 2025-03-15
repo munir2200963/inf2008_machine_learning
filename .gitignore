@@ -2,3 +2,4 @@ demo/tacatron_model/config.json
 demo/tacatron_model/model_file.pth
 /.venv
 /__pycache__
+/demo-jolin/src/backend/tts_models--en--blizzard2013--capacitron-t2-c50
