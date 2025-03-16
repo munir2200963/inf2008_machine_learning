@@ -145,9 +145,9 @@ from sentences import sentences
 from clustering_utils import * 
 
 
-# Initialize Extractors
-voiceprint_extractor = ECAPAVoiceprintExtractor()
-prosody_extractor = TacatronProsodyExtractor(use_cuda=False)
+# # Initialize Extractors
+# voiceprint_extractor = ECAPAVoiceprintExtractor()
+# prosody_extractor = TacatronProsodyExtractor(use_cuda=False)
 
 def save_audios(audios, user_id, output_folder):
     """
@@ -196,7 +196,7 @@ def combine_embeddings(user_id, input_folder, output_folder):
         print(f"No embeddings found for user_id '{user_id}' in {input_folder}")
         return None
 
-def process_speaker_embedding(user_id, audio_files):
+def process_speaker_embedding(user_id, audio_files, voiceprint_extractor, prosody_extractor):
     """
     Processes speaker embeddings:
       1. Save and rename 20 audio files using the provided user_id.
@@ -233,7 +233,8 @@ def process_speaker_embedding(user_id, audio_files):
     # Combine embeddings for voiceprint and prosody
     combine_embeddings(user_id, voiceprint_embeddings_folder, voiceprint_combined_embeddings_folder)
     combine_embeddings(user_id, prosody_embeddings_folder, prosody_combined_embeddings_folder)
-    
+
+    test_folder_path = "../../../test_set/data/voiceprint_ecapa_tdnn/speaker_embeddings"
     # Compute clusters
     umap_model_demo, speaker_cluster_mapping_demo, cluster_centroids_demo = process_enroll_data(voiceprint_embeddings_folder, voiceprint_embeddings_folder)
 
@@ -246,9 +247,3 @@ def process_speaker_embedding(user_id, audio_files):
         }, f)
     
     return
-
-# Example usage:
-if __name__ == "__main__":
-    user_id = "huang"
-    audio_files = [f"uploads/{user_id}_audio_{i}.wav" for i in range(20)]
-    process_speaker_embedding(user_id, audio_files)

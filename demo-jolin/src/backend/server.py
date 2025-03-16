@@ -6,7 +6,7 @@ from tacatron import TacatronProsodyExtractor
 from ecapa_tdnn import ECAPAVoiceprintExtractor
 from process_speaker_embedding import process_speaker_embedding
 from validate_trial import validateTrial
-import sentences  # Import sentences dynamically
+import sentences 
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -66,7 +66,7 @@ def enroll_user():
         return jsonify({"error": f"Expected 20 files, but received {len(saved_files)}!"}), 500
 
     # ✅ Now pass the dynamically received user_id
-    process_speaker_embedding(user_id, saved_files)
+    process_speaker_embedding(user_id, saved_files, voiceprint_extractor, prosody_extractor)
 
     return jsonify({
         "message": "✅ Enrollment successful!",
@@ -92,7 +92,7 @@ def validate_trial_endpoint():
     trial_audio.save(trial_path)
 
     # Validate
-    result = validateTrial(user_id, trial_path, text)
+    result = validateTrial(user_id, trial_path, text, voiceprint_extractor, prosody_extractor)
 
     return jsonify({"result": result}), 200
 

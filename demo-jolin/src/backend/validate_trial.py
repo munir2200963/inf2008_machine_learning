@@ -179,7 +179,7 @@ def compute_similarity(embedding1, embedding2):
     return similarity
 
 # --- Main Function ---
-def validateTrial(speaker_name, trialAudio, text):
+def validateTrial(speaker_name, trialAudio, text, voiceprint_extractor, prosody_extractor):
     """
     Validate a trial audio against a speaker's enrollment embeddings.
     
@@ -225,8 +225,16 @@ def validateTrial(speaker_name, trialAudio, text):
         print("❌ Audio conversion failed. Exiting function.")
         return False
     
-    # For scaling new data using X_train data
     scaler = joblib.load("scaler.pkl")
+
+    print("Scaler mean:", scaler.mean_)
+    print("Scaler scale:", scaler.scale_)
+
+    # Check if the scaler is effectively an identity transform
+    if np.allclose(scaler.mean_, 0, atol=1e-5) and np.allclose(scaler.scale_, 1, atol=1e-5):
+        print("Warning: The scaler appears to be an identity transform. Your training data may already be normalized.")
+    else:
+        print("Scaler parameters look as expected.")
 
     # For cluster
     with open("umap_model_demo.pkl", "rb") as f:
@@ -240,10 +248,6 @@ def validateTrial(speaker_name, trialAudio, text):
     speaker_validation_model = joblib.load("model_final.pkl")
     
     try:
-        # Instantiate extractors
-        voiceprint_extractor = ECAPAVoiceprintExtractor() 
-        prosody_extractor = TacatronProsodyExtractor(use_cuda=False)
-        
         # Extract trial embeddings from the trial audio
         # For voiceprint, we need to load and preprocess the audio
         audio = voiceprint_extractor.load_audio(converted_trialAudio)
@@ -273,12 +277,26 @@ def validateTrial(speaker_name, trialAudio, text):
             np.array([vp_manhattan]),
             np.array([cluster_match])
         ])
+        print(f"Feature vector before scaling: {feature_vector}")
 
+        # Reshape the feature vector to 2D (1 sample with 6 features)
+        feature_vector = feature_vector.reshape(1, -1)
+
+        # Scale the feature vector using the pre-loaded scaler
         feature_vector = scaler.transform(feature_vector)
-    
-        print(f"✅ Feature vector: {feature_vector}")
+        print(f"✅ Feature vector after pre-loaded scaler: {feature_vector}")
 
-        predictions = speaker_validation_model.predict(feature_vector.reshape(1, -1))
+        # Define a shift variable for the first 5 features (the 6th feature remains unchanged)
+        # These shift values are examples; adjust them based on your analysis.
+        shift = np.array([18.83, 8.48, 0.82, 3.42, 8.48])
+
+        # Apply the shift: subtract the shift values from the first five features
+        feature_vector[:, :5] = feature_vector[:, :5] - shift
+        print(f"Feature vector after shift: {feature_vector}")
+
+        # Predict using the speaker validation model
+        predictions = speaker_validation_model.predict(feature_vector)
+        print(predictions)
 
         is_valid_speaker = int(predictions[0])
 
