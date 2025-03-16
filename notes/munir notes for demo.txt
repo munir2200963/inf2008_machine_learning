@@ -1,0 +1,69 @@
+speechbrain
+hdbscan
+pydub
+
+need run npm install in demo-jolin instead of backend
+
+npm start
+
+tacatron2 keeps re initialising
+
+print("Loaded sentences:", sentences.sentences)
+
+rmbr to not push app.js & package.json
+
+change to like this "/get-sentences"
+  "proxy": "http://127.0.0.1:5000",
+
+sudo apt-get update
+sudo apt-get install ffmpeg
+
+___
+
+models extracted might be wrong on my side?
+then jolin side works?
+
+cos she was able to verify well with her features.
+
+while my features r always far
+[[4.47855703 2.77596924 4.64063568 1.63317051 2.77596924 4.02169300]] bad [produced by demo] false negative
+[[9.44601367e+03 4.00223340e+03 4.50390244e+01 2.40615501e+01 4.00223340e+03 4.02169300e-15]] produced by demo, accurate, when its actly wrong
+
+
+[[1.30594878 -2.72319102 -0.34644538, -0.94447626, -2.72319102, 4.01368339]] good [model]
+
+1st solution: can just try minus-ing
+
+2nd theory: models extracted might be wrong on my side? then jolin side works?
+
+[[2.44108672e+04 3.49650000e+03 3.31366653e+01 3.11605988e+01
+  3.49650000e+03 4.02169300e-15]] jolin purple
+
+[[4.99092539e+04 3.00760522e+03 3.94390030e+01 2.75083466e+01
+  3.00760522e+03 4.02169300e-15]]
+
+ok so this means that its not the model extraction i think.. bc im using the combined speaker embeddings formed previously on jolin machine
+
+
+NVM TURNS OUT IT WAS SCALER NOT WORKING.
+
+[[1.30594878 -2.72319102 -0.34644538, -0.94447626, -2.72319102, 4.01368339]] good by model
+
+demo values:
+[[20.39497912  5.36575937  0.47389057  5.60175261  5.36575937 -0.2491477 ]] supposed to match
+[[20.03106431  7.18723831  0.41684314  3.96131007  7.18723831  4.01368339]] supposed to match
+[[16.57556857  6.42538338  1.13262199  4.40152061  6.42538338 -0.2491477 ]] supposed to match
+[[26.57105929  5.46898378  6.19058791 -1.42129156  5.46898378  4.01368339]] supposed to match
+
+[[ 7.78945626  9.16051635  5.42179416  0.58496496  9.16051635 -0.2491477 ]] not supposed to match
+[[ 4.7349477  11.11144457  2.18726803  3.35488837 11.11144457 -0.2491477 ]] not supposed to match
+
+[[12.26543685  5.56115011  1.9275556   1.50746686  5.56115011 -0.2491477 ]] purple against purple
+
+[[ 4.7349477  11.11144457  2.18726803  3.35488837 11.11144457 -0.2491477 ]] comparing my voice against purple.. maybe its the model...
+
+___
+
+i think its the prosody model. the values are so low for prosody model.
+
+ok i fixed it by adding some shift to minus, it didnt work when i used another scaling
