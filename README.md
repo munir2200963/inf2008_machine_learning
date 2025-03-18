@@ -142,7 +142,7 @@ You can watch the presentation video here:
 
 [![Watch the Presentation Video](https://img.youtube.com/vi/bt7mSbaJRyk/0.jpg)](https://www.youtube.com/watch?v=bt7mSbaJRyk)
 
-# Who to Contact
+# Contact
 
 For any inquiries or further information, please reach out to:
 
