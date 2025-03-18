@@ -1,0 +1,13 @@
+CHANGELOG.txt
+LICENSE
+MANIFEST.in
+README.md
+setup.cfg
+setup.py
+bnnumerizer/__init__.py
+bnnumerizer/numerizer.py
+bnnumerizer/words.py
+bnnumerizer.egg-info/PKG-INFO
+bnnumerizer.egg-info/SOURCES.txt
+bnnumerizer.egg-info/dependency_links.txt
+bnnumerizer.egg-info/top_level.txt
