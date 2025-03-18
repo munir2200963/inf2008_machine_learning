@@ -1,1 +1,0 @@
-the individual speaker embedding after being extracted by tacatron will be saved here
