@@ -140,7 +140,7 @@ npm start
 
 You can watch the presentation video here:
 
-[![Watch the Presentation Video](https://img.youtube.com/vi/bt7mSbaJRyk/0.jpg)](https://www.youtube.com/watch?v=bt7mSbaJRyk)
+[![Watch the Presentation Video](https://img.youtube.com/vi/Zh1Avrk9bG0/0.jpg)](https://www.youtube.com/watch?v=Zh1Avrk9bG0)
 
 # Contact
 
